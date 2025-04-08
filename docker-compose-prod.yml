@@ -4,7 +4,7 @@ services:
   api:
     depends_on:
       - postgres
-    image: sloppynetworks/fastapi_app # Use the image from Docker Hub sloppynetworks-hub name from video not mine
+    image: sloppynetworks/fastapi_app # Use the image from Docker Hub sloppynetworks-hub name from video not mine 
     container_name: fastapi_app
     ports:
       - "80:8000"
