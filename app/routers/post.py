@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Response
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from typing import Optional, List
@@ -74,12 +74,15 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depe
     # conn.commit()
     delete_post_query = db.query(models.Post).filter(models.Post.id == id)
     delete_post = delete_post_query.first()
+    if not delete_post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Post with id {id} does not exist")
     if delete_post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="You are not the owner of this post")
     delete_post_query.delete(synchronize_session=False)
     db.commit()
-    return delete_post
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.put("/{id}", response_model=schemas.Post)
@@ -90,6 +93,9 @@ def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)
     # conn.commit()
     updated_post = db.query(models.Post).filter(models.Post.id == id)
     updated_post_query = updated_post.first()
+    if not updated_post_query:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Post with id {id} does not exist")
     if updated_post_query.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="You are not the owner of this post")
